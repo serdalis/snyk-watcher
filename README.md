@@ -46,11 +46,16 @@ Snyk-Watcher runs completely standalone in a Docker container. We've included a 
 
 1. Provide the Snyk-Watcher container your GitHub and Snyk tokens in these two environment variables:
 
-   * `SECRET_GITHUB_SECRET`
-   * `SECRET_SNYK_API_TOKEN`
+   * `SECRET_GITHUB_SECRET`  -- The highly random string from before.
+   * `SECRET_SNYK_API_TOKEN` -- Create using a service account.
+
+## Debugging
 
 1. Test Snyk-Watcher by adding a new repository, then looking in the app’s advanced settings to see if the request was successful.
-    
+2. Error Codes:
+   * 404 error Status, Check your firewall settings and allow the port.
+   * 401 Error Status, Check your secret github secret.
+   * 500 Error Status, Use `docker attach {instance id}` and watch the output for error messages.
 
 ## Limitations
 
