@@ -52,7 +52,7 @@ async def handle_webhook(
         if webhook.requires_import():
             await client.import_git_project(org_name, repo_name)
     except Exception as e:
-        logger.error(traceback.format_exc())
+        logger.error(format_exc())
         # Failed internally
         return Response(status_code=500)
 
