@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Response, Request, Header
-from traceback import format_exc
 from typing import Optional
 
 from app.common.logging import getLogger
@@ -52,7 +51,7 @@ async def handle_webhook(
         if webhook.requires_import():
             await client.import_git_project(org_name, repo_name)
     except Exception as e:
-        logger.error(format_exc())
+        logger.error(e)
         # Failed internally
         return Response(status_code=500)
 
