@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Response, Request, Header
+from traceback import format_exc
 from typing import Optional
 
 from app.common.logging import getLogger
@@ -46,13 +47,12 @@ async def handle_webhook(
 
     try:
         if webhook.requires_delete():
-            delete_repo = webhook.get_delete_repo()
-            await client.delete_git_project(org_name, delete_repo)
+            await client.delete_git_project(org_name, repo_name)
 
         if webhook.requires_import():
             await client.import_git_project(org_name, repo_name)
     except Exception as e:
-        logger.error(e)
+        logger.error(traceback.format_exc())
         # Failed internally
         return Response(status_code=500)
 
