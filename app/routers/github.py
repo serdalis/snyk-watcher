@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Response, Request, Header
 from typing import Optional
+from re import match
 
 from app.common.logging import getLogger
 from app.github.webhook_validator import verify_webhook
 from app.github.webhook_model import Webhook
 from app.github.config import get_github_secret
 from app.snyk.client import SnykClient
-from app.snyk.utils import get_snyk_token
+from app.snyk.utils import get_snyk_token, get_config_settings
 
 logger = getLogger(__name__)
 router = APIRouter()
@@ -40,16 +41,19 @@ async def handle_webhook(
 
     # Snyk client to add / remove repositories
     client = SnykClient(snyk_token)
+    snyk_config = get_config_settings()
+    org_mapping = snyk_config['OrginisationMap']
 
     org_name = webhook.repository.org
     repo_name = webhook.repository.name
+    snyk_org_name = next((_['Name'] for _ in org_mapping if match(_['Matcher'], org_name) != None), org_name)
 
     try:
         if webhook.requires_delete():
-            await client.delete_git_project(org_name, repo_name)
+            await client.delete_git_project(snyk_org_name, repo_name)
 
         if webhook.requires_import():
-            await client.import_git_project(org_name, repo_name)
+            await client.import_git_project(snyk_org_name, org_name, repo_name)
     except Exception as e:
         logger.error(e)
         # Failed internally

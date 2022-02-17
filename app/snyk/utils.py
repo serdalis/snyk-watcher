@@ -1,5 +1,5 @@
 import collections
-from app.snyk.config import get_snyk_token
+from app.snyk.config import get_config_settings, get_snyk_token
 
 
 SnykObject = collections.namedtuple('SnykObject', 'name id')

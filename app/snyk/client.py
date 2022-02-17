@@ -1,5 +1,6 @@
 import aiohttp
 import asyncio
+from json import loads
 
 from app.common.logging import getLogger
 from app.common.constants import SNYK_INTEGRATION
@@ -72,8 +73,8 @@ class SnykClient:
 
         raise Exception('Could not find integration')
 
-    async def delete_git_project(self, org_name, repo_name):
-        org = await self._get_org(org_name)
+    async def delete_git_project(self, snyk_org_name, repo_name):
+        org = await self._get_org(snyk_org_name)
         project = await self.get_project(org, repo_name)
 
         if not project:
@@ -87,8 +88,8 @@ class SnykClient:
 
         raise Exception(f'Failed to delete repository {repo_name}')
 
-    async def import_git_project(self, org_name, repo_name):
-        org = await self._get_org(org_name)
+    async def import_git_project(self, snyk_org_name, git_org_name, repo_name):
+        org = await self._get_org(snyk_org_name)
         project = await self.get_project(org, repo_name)
 
         if project:
@@ -97,7 +98,7 @@ class SnykClient:
         data = {
             'files': [],
             'target': {
-                'owner': org_name,
+                'owner': git_org_name,
                 'name': repo_name,
                 'branch': 'master'
             }
@@ -109,7 +110,11 @@ class SnykClient:
         res = await self.session.post(url, json=data)
 
         if res.status != 201:
-            raise Exception(f'Failed to import repository {repo_name}')
+            try:
+                msg = loads(await res.read())
+                raise Exception(f'Failed to import {repo_name}, Return {msg["code"]}, Error {msg["error"]} :: {msg["message"]}')
+            except:
+                raise Exception(f'Failed to import {repo_name}')
 
     def __del__(self):
         loop = asyncio.get_running_loop()
