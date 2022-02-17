@@ -13,6 +13,8 @@ Snyk-Watcher runs completely standalone in a Docker container. We've included a 
 
 1. Clone this repository.
 
+1. Enter your git Orginisation -> Snyk Orginisation mappings into the app/snyk/config.py file. These mappings use regex and are checked in order.
+
 1. Build the container:
 
    `docker-compose build`
